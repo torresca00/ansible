@@ -15,5 +15,5 @@
          api_args:
            chat_id: 425060386
            parse_mode: "markdown"
-           text: "This failed {{outer_item.key}} {{outer_item.value}}"
+           text: "Resultado"
         
