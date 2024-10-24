@@ -13,5 +13,5 @@
        telegram:
         token: '7849177175:AAEmmfMDS1-LMCsDyzW5T6PB9qHC1KHS-1g'
         chat_id: 425060386
-        msg: "Your precious application has been deployed CATS: https://example.com"
+        msg: Your precious application has been deployed CATS: https://example.com
         
