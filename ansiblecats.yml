@@ -10,7 +10,7 @@
        become: true
 
     - name: Send notify to Telegram
-       community.general.telegram:
+       telegram:
         token: '7849177175:AAEmmfMDS1-LMCsDyzW5T6PB9qHC1KHS-1g'
         api_args:
         chat_id: 425060386
