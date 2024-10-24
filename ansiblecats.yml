@@ -7,7 +7,7 @@
       ansible.builtin.yum:
        name: '*'
        state: latest
-     become: true
+       become: true
 
     - name: Send notify to Telegram
        community.general.telegram:
