@@ -12,9 +12,6 @@
     - name: Send notify to Telegram
        telegram:
         token: '7849177175:AAEmmfMDS1-LMCsDyzW5T6PB9qHC1KHS-1g'
-        api_args:
         chat_id: 425060386
-        parse_mode: "markdown"
-        text: "Your precious application has been deployed CATS: https://example.com"
-        disable_web_page_preview: true
-        disable_notification: true
+        msg: "Your precious application has been deployed CATS: https://example.com"
+        
