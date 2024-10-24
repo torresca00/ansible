@@ -9,9 +9,11 @@
        state: latest
        become: true
 
-    - name: Send notify to Telegram
-       telegram:
+        - name: "Telegram"
+      community.general.telegram:
         token: '7849177175:AAEmmfMDS1-LMCsDyzW5T6PB9qHC1KHS-1g'
-        chat_id: 425060386
-        msg: Your precious application has been deployed CATS: https://example.com
+        api_args:
+          chat_id: 425060386
+          parse_mode: "markdown"
+          text: "This failed {{outer_item.key}} {{outer_item.value}}"
         
