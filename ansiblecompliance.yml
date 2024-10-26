@@ -1,1 +1,97 @@
+- name: Compliance de Servidor Linux
+  hosts: web
+  become: true
+  gather_facts: true
+ 
+  vars:
+    allowed_users:
+      - root
+      - admin
+    password_min_length: 12
+    password_complexity: "YES"
+    password_max_age: 100
+    allowed_services:
+      - sshd
+      - chronyd
+      - crond
+    required_packages:
+      - audit
+      - rsyslog
+ 
+  tasks:
+ 
+    - name: Verificar edad máxima de contraseñas
+      lineinfile:
+        path: /etc/login.defs
+        regexp: "^PASS_MAX_DAYS"
+        line: "PASS_MAX_DAYS {{ password_max_age }}"
+        state: present
+      register: reemplazo
 
+    - name: Dame un mensaje de consola
+      ansible.builtin.debug:
+        var: reemplazo
+
+    - name: Mensaja linea Edad Días
+      ansible.builtin.command:
+        cmd: grep PASS_MAX_DAYS /etc/login.defs
+      changed_when: false
+
+    - name: Validar usuarios permitidos en /etc/passwd
+      shell: "cut -d: -f1 /etc/passwd"
+      register: passwd_users
+      changed_when: false
+
+    - name: Verificar configuración de SELinux (solo para RHEL/CentOS)
+      selinux:
+        policy: targeted
+        state: enforcing
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Configurar logs del sistema con rsyslog
+      service:
+        name: rsyslog
+        state: started
+        enabled: true
+    
+    - name: Aplicar permisos correctos en /etc/passwd y /etc/group
+      file:
+        path: "{{ item }}"
+        mode: "0644"
+        state: file
+      loop:
+        - /etc/passwd
+        - /etc/group
+    
+    - name: Configuración de auditoría de seguridad
+      lineinfile:
+        path: /etc/audit/auditd.conf
+        regexp: "^max_log_file_action"
+        line: "max_log_file_action = keep_logs"
+        state: present
+
+    - name: Ensure firewall package is installed
+      ansible.builtin.dnf:
+        name: firewalld
+        state: present
+
+    - name: Ensure firewall service is up and running
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Verificar que solo estén en ejecución los servicios permitidos
+      shell: "systemctl list-units --type=service --state=running --no-pager --no-legend"
+      register: running_services
+      changed_when: false
+ 
+    - name: Asegurarse de que solo estén en ejecución los servicios autorizados
+      fail:
+        msg: "Servicio no autorizado en ejecución: {{ item }}"
+      when: item not in allowed_services
+      loop: "{{ running_services.stdout_lines | map('regex_search', '^\\S+') | list }}"
+
+    - name: Reporte de compliance final
+      debug:
+        msg: "Verificación de compliance completada en el servidor {{ inventory_hostname }}. Por favor, revisa los registros de tareas fallidas para conocer más detalles."

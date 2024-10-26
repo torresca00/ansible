@@ -17,3 +17,20 @@
          parse_mode: "markdown"
          text: "Resultado"
         
+
+- name: Un playbook muy muy sencillo
+  # A quienes se les va a operar 
+  hosts: web
+  tasks:
+    - name: Dame un mensaje
+      ansible.builtin.debug:
+        msg: "Bienvenido al mundo de Ansible"
+    
+    - name: "Applying patches to the server"
+      yum: name=kernel state=latest
+      register: patch_update
+      become: true
+
+    - name: "Reiniciar solo si se hizo un cambio"
+      ansible.builtin.reboot:
+      when: patch_update is changed
